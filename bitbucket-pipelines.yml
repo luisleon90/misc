@@ -1,0 +1,21 @@
+image: python:3.8
+
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: 'Run dbt Cloud Job'
+          caches:
+            - pip
+          script:
+           # Check to only build if PR destination is master (or other branch). 
+           # Comment or remove line below if you want to run on all PR's regardless of destination branch.
+            - if [ "${BITBUCKET_PR_DESTINATION_BRANCH}" != "master" ]; then printf 'PR Destination is not master, exiting.'; exit; fi
+            - pip install requests
+            - export DBT_CLOUD_ACCOUNT_ID=[account_id] 
+            - export DBT_CLOUD_PROJECT_ID=[project_id]
+            - export DBT_CLOUD_JOB_ID=[job_id]
+            - python dbt_cloud_ci.py
+			
+			
+# list of where the ids can be found: https://cloud.getdbt.com/#/accounts/[account_id]/projects/[project_id]/jobs/[job_id]/
